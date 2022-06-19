@@ -48,18 +48,43 @@ public class FXMLController {
     	this.cmbLocale.getItems().clear();
     	String citta = this.cmbCitta.getValue();
     	if(citta != null) {
-    		//TODO popolare la tendina dei locali per la città selezionata
-    		
+    		cmbLocale.getItems().addAll(this.model.getAllBusinessCity(citta));
     	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	try {
+    		String city = this.cmbCitta.getValue();
+    		Business business = this.cmbLocale.getValue();
+    		this.model.creaGrafo(business.getBusinessId(), city);
+    		txtResult.setText("Numero vertici: " + model.getNumeroVertici());
+    		txtResult.appendText("\nNumero archi: " + model.getNumeroArchi());
+    		List<Review> reviews = model.getMaxEdgeReview();
+    		for(Review r : reviews) {
+    			txtResult.appendText("\nId vertice massime connessioni: " + r.getReviewId());
+    			txtResult.appendText("\nNumero archi uscenti: " + model.getNeighborSize(r));
+    		}
+    	}catch(NullPointerException e) {
+    		txtResult.setText("Selezionare prima una citta', poi un locale valido prima di creare il grafo!");
+    	}
+    	
     	
     }
 
     @FXML
     void doTrovaMiglioramento(ActionEvent event) {
+    	try {
+    		List<Review> sequenza = this.model.trovaMiglioramento();
+    		txtResult.appendText("\nTrovata sequenza massima di dimensione " + sequenza.size());
+    		for(Review r : sequenza) {
+    			txtResult.appendText("\n" + r.getReviewId());
+    		}
+    		txtResult.appendText("\nGiorni totali: " + model.getGiorniSequenzaMigliore());
+    		
+    	} catch(NullPointerException e) {
+    		txtResult.setText("Creare il grafo prima di cercare il miglioramento!");
+    	}
     	
     }
 
@@ -75,5 +100,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	cmbCitta.getItems().addAll(this.model.getAllCities());
+    	
+    	
     }
 }
